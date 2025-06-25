@@ -1,10 +1,12 @@
 # LahiriISOFlasher
 
-A modern, user-friendly ISO flashing application for Windows, similar to balenaEtcher but with additional Rufus-like features.
+<img alt="GitHub Created At" src="https://img.shields.io/github/created-at/MYTAditya/LahiriISOFlasher?color=%238a2be2"> <img alt="GitHub Release" src="https://img.shields.io/github/v/release/MYTAditya/LahiriISOFlasher?color=%23a9e43a"> <img alt="GitHub License" src="https://img.shields.io/github/license/MYTAditya/LahiriISOFlasher?color=orange"> <img alt="GitHub top language" src="https://img.shields.io/badge/language-Python-blue">
+
+A user-friendly ISO flashing application for Windows, similar to [balenaEtcher](https://github.com/balena-io/etcher) but with additional [Rufus](https://github.com/pbatard/rufus)-like features.
 
 ## Features
 
-- **Modern Dark UI**: Clean, professional interface with #a9e43a accent color
+- **Modern Dark UI**: Clean, professional interface with lime accent color
 - **4-Layer Workflow**: 
   1. Select USB Drive
   2. Select ISO File
@@ -66,21 +68,6 @@ This will create a single executable file in the `dist` folder.
 - **ISO Validation**: Checks for valid ISO format and bootability
 - **Confirmation Dialog**: Confirms all settings before flashing
 - **Progress Monitoring**: Shows real-time progress and status
-
-## Technical Details
-
-- Built with Python and CustomTkinter for modern UI
-- Uses Windows API for drive detection and management
-- Supports multiple flashing methods for maximum compatibility
-- Implements proper error handling and user feedback
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Disclaimer
 
