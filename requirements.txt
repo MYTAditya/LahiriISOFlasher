@@ -1,0 +1,5 @@
+tkinter
+customtkinter==5.2.0
+Pillow==10.0.0
+psutil==5.9.5
+pywin32==306
