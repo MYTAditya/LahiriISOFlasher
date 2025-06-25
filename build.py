@@ -22,6 +22,7 @@ def build_executable():
         "--add-data=ui;ui",
         "--add-data=core;core",
 	"--add-data=icon;icon",
+	"--add-data=icon.ico;.",
         "--hidden-import=customtkinter",
         "--hidden-import=PIL",
         "--hidden-import=psutil",
@@ -31,8 +32,8 @@ def build_executable():
     ]
     
     # Add icon if it exists
-    if os.path.exists("ui/icon.ico"):
-        cmd.insert(-1, "--icon=ui/icon.ico")
+    if os.path.exists("icon.ico"):
+        cmd.insert(-1, "--icon=icon.ico")
         print("Using custom icon for executable")
     else:
         print("No icon file found, building without icon")
