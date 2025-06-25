@@ -35,7 +35,7 @@ An user-friendly ISO flashing application for Windows, similar to [balenaEtcher]
 1. Clone the repository
 2. Install dependencies:
    ```bash
-   pip install -r requirements.txt
+   py -m pip install -r requirements.txt
    ```
 3. Run the application:
    ```bash
