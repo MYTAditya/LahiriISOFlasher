@@ -39,7 +39,7 @@ An user-friendly ISO flashing application for Windows, similar to [balenaEtcher]
    ```
 3. Run the application:
    ```bash
-   python main.py
+   py main.py
    ```
 
 ## Building from Source
@@ -47,7 +47,7 @@ An user-friendly ISO flashing application for Windows, similar to [balenaEtcher]
 To create a standalone executable:
 
 ```bash
-python build.py
+py build.py
 ```
 
 This will create a single executable file in the `dist` folder.
