@@ -95,7 +95,7 @@ class MainWindow(ctk.CTk):
         # Try to load and display the icon
         try:
             # Get the correct path for the icon
-            icon_path = self.get_resource_path("icon/icon.png")
+            icon_path = self.get_resource_path("ui/icon.png")
             
             # Load and resize the icon
             icon_image = Image.open(icon_path)
