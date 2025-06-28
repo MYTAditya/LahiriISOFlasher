@@ -21,8 +21,6 @@ def build_executable():
         "--name=LahiriISOFlasher",
         "--add-data=ui;ui",
         "--add-data=core;core",
-	"--add-data=icon;icon",
-	"--add-data=icon.ico;.",
         "--hidden-import=customtkinter",
         "--hidden-import=PIL",
         "--hidden-import=psutil",
