@@ -2,7 +2,7 @@
 
 <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/MYTAditya/LahiriISOFlasher?color=%238a2be2"> <img alt="GitHub Release" src="https://img.shields.io/github/v/release/MYTAditya/LahiriISOFlasher?color=%23a9e43a"> <img alt="GitHub License" src="https://img.shields.io/github/license/MYTAditya/LahiriISOFlasher?color=orange"> <img alt="GitHub top language" src="https://img.shields.io/badge/language-Python-blue">
 
-![icon](https://github.com/MYTAditya/LahiriISOFlasher/blob/master/icon/icon.png)
+![icon](https://github.com/MYTAditya/LahiriISOFlasher/blob/master/ui/icon.png)
 
 An user-friendly ISO flashing application for Windows, similar to [balenaEtcher](https://github.com/balena-io/etcher) but with additional [Rufus](https://github.com/pbatard/rufus)-like features.
 
@@ -52,7 +52,7 @@ To create a standalone executable:
 py build.py
 ```
 
-This will create a single executable file in the `dist` folder.
+This will create a single executable file in the `dist` folder. (It requires `icon.ico` at the the same folder to start the application.)
 
 ## Usage
 
