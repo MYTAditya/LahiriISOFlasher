@@ -4,6 +4,9 @@
 
 <img src="https://github.com/MYTAditya/LahiriISOFlasher/blob/master/ui/icon.png" alt="icon" width="360">
 
+[![](https://img.youtube.com/vi/OvTpKhZJLkU/0.jpg)](https://youtu.be/OvTpKhZJLkU?si=k-NAldYZvZr8qiiC)
+
+
 An user-friendly ISO flashing application for Windows, similar to [balenaEtcher](https://github.com/balena-io/etcher) but with additional [Rufus](https://github.com/pbatard/rufus)-like features.
 
 ## Features
