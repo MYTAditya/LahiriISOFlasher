@@ -39,11 +39,11 @@ An user-friendly ISO flashing application for Windows, similar to [balenaEtcher]
 ### For Developers
 1. Clone the repository
 2. Install dependencies:
-   ```bash
+   ```cmd
    py -m pip install -r requirements.txt
    ```
 3. Run the application:
-   ```bash
+   ```cmd
    py main.py
    ```
 
@@ -51,7 +51,7 @@ An user-friendly ISO flashing application for Windows, similar to [balenaEtcher]
 
 To create a standalone executable:
 
-```bash
+```cmd
 py build.py
 ```
 
