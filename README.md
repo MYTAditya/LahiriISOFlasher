@@ -1,6 +1,6 @@
 # Lahiri ISO Flasher
 
-<img alt="GitHub Created At" src="https://img.shields.io/github/created-at/MYTAditya/LahiriISOFlasher?color=%238a2be2"> <img alt="GitHub Release" src="https://img.shields.io/github/v/release/MYTAditya/LahiriISOFlasher?color=%23a9e43a"> <img alt="GitHub License" src="https://img.shields.io/github/license/MYTAditya/LahiriISOFlasher?color=orange"> <img alt="GitHub top language" src="https://img.shields.io/badge/language-Python-blue">
+<img alt="GitHub Created At" src="https://img.shields.io/github/created-at/MYTAditya/LahiriISOFlasher?color=%238a2be2&style=for-the-badge"> <img alt="GitHub Release" src="https://img.shields.io/github/v/release/MYTAditya/LahiriISOFlasher?color=%23a9e43a&style=for-the-badge"> <img alt="GitHub License" src="https://img.shields.io/github/license/MYTAditya/LahiriISOFlasher?color=orange&style=for-the-badge"> <img alt="GitHub top language" src="https://img.shields.io/badge/language-Python-blue?style=for-the-badge">
 
 <img src="https://github.com/MYTAditya/LahiriISOFlasher/blob/master/ui/icon.png" alt="icon" width="360">
 
