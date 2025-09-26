@@ -15,7 +15,7 @@ An user-friendly ISO flashing application for Windows, similar to [balenaEtcher]
 - **4-Layer Workflow**: 
   1. Select USB Drive
   2. Select ISO File
-  3. Configure Settings (Volume Name, Partition Scheme, Target System)
+  3. Configure Settings (Volume Name, Partition Scheme, Target System and File System)
   4. Flash ISO
 - **ISO Validation**: Automatically validates ISO files and checks if they're bootable
 - **Auto Volume Detection**: Extracts volume name from ISO files when available
@@ -65,6 +65,7 @@ This will create a single executable file in the `dist` folder. (It requires `ic
    - Volume Name: Set the name for your USB drive
    - Partition Scheme: Choose MBR or GPT
    - Target System: Select BIOS, UEFI, or hybrid compatibility
+   - File System: Choose FAT32 or NTFS
 4. **Flash**: Click the flash button to start the process
 
 ## Safety Features
