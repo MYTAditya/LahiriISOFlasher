@@ -11,13 +11,33 @@ class ISOFlasher:
         self.progress_callback = None
         self.temp_dir = None
         
-    def flash_iso(self, iso_path, drive_letter, volume_name, partition_scheme, target_system, progress_callback=None):
+    def flash_iso(self, iso_path, drive_letter, volume_name, partition_scheme, target_system, file_system, progress_callback=None):
         """Flash ISO to USB drive using temporary folder extraction method"""
         self.progress_callback = progress_callback
         
         try:
             # Update progress
             self._update_progress(5, "Validating inputs...")
+
+            # To prevent unwanted configuration
+            if partition_scheme == "MBR":
+                if target_system == "BIOS or UEFI":
+                    if file_system == "FAT32":
+                        pass
+                    else:
+                        raise Exception("Selected unwanted configuration")
+                elif target_system == "BIOS (Legacy)":
+                    pass
+                else:
+                    raise Exception("Selected unwanted configuration")
+            else:
+                if target_system == "UEFI":
+                    if file_system == "FAT32":
+                        pass
+                    else:
+                        raise Exception("Selected unwanted configuration")
+                else:
+                    raise Exception("Selected unwanted configuration")
             
             # Validate inputs
             if not os.path.exists(iso_path):
@@ -35,7 +55,7 @@ class ISOFlasher:
             self._update_progress(10, "Preparing USB drive...")
             
             # Format the drive first
-            if not self._format_drive_standalone(drive_letter, volume_name, partition_scheme):
+            if not self._format_drive_standalone(drive_letter, volume_name, partition_scheme, file_system):
                 raise Exception("Failed to format USB drive")
                 
             # Update progress
@@ -100,16 +120,14 @@ class ISOFlasher:
         except Exception:
             return None
             
-    def _format_drive_standalone(self, drive_letter, volume_name, partition_scheme):
+    def _format_drive_standalone(self, drive_letter, volume_name, partition_scheme, file_system):
         """Format the USB drive using only Windows built-in tools"""
         try:
-            # Determine file system based on partition scheme
-            file_system = "FAT32" if partition_scheme == "MBR" else "NTFS"
-            
             # Create diskpart script for comprehensive formatting
             diskpart_script = f"""
 select disk {self._get_disk_number(drive_letter)}
 clean
+convert {partition_scheme}
 create partition primary
 active
 format fs={file_system} label="{volume_name}" quick
