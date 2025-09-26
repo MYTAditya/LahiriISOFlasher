@@ -21,7 +21,7 @@ class MainWindow(ctk.CTk):
         self.title("Lahiri ISO Flasher")
         self.geometry("800x750")
         self.resizable(False, False)
-        self.wm_iconbitmap("icon.ico")
+        self.wm_iconbitmap("ui/icon.ico")
         
         # Set custom colors
         self.primary_color = "#a9e43a"
@@ -40,6 +40,7 @@ class MainWindow(ctk.CTk):
         self.volume_name = ""
         self.partition_scheme = "MBR"
         self.target_system = "BIOS or UEFI"
+        self.file_system = "FAT32"
         self.original_drive_letter = None  # Store original drive letter
         
         # Layer completion status
@@ -304,7 +305,22 @@ class MainWindow(ctk.CTk):
             width=200,
             state="disabled"
         )
-        self.target_dropdown.pack(anchor="w")
+        self.target_dropdown.pack(anchor="w", pady=(0, 15))
+
+        # File system
+        self.system_label = ctk.CTkLabel(right_column, text="File System:", text_color="gray")
+        self.system_label.pack(anchor="w", pady=(0, 5))
+        
+        self.system_var = ctk.StringVar(value="FAT32")
+        self.system_var.trace("w", self.on_config_change)
+        self.system_dropdown = ctk.CTkComboBox(
+            right_column,
+            variable=self.system_var,
+            values=["FAT32", "NTFS"],
+            width=200,
+            state="disabled"
+        )
+        self.system_dropdown.pack(anchor="w")
         
     def setup_flash_section(self):
         # Flash section frame
@@ -420,18 +436,22 @@ class MainWindow(ctk.CTk):
             self.volume_label.configure(text_color="white")
             self.partition_label.configure(text_color="white")
             self.target_label.configure(text_color="white")
+            self.system_label.configure(text_color="white")
             self.volume_entry.configure(state="normal")
             self.partition_dropdown.configure(state="normal")
             self.target_dropdown.configure(state="normal")
+            self.system_dropdown.configure(state="normal")
         else:
             self.config_frame.configure(fg_color=self.disabled_color)
             self.config_title.configure(text_color="gray")
             self.volume_label.configure(text_color="gray")
             self.partition_label.configure(text_color="gray")
             self.target_label.configure(text_color="gray")
+            self.system_label.configure(text_color="gray")
             self.volume_entry.configure(state="disabled")
             self.partition_dropdown.configure(state="disabled")
             self.target_dropdown.configure(state="disabled")
+            self.system_dropdown.configure(state="disabled")
             
         self.config_status.configure(
             text="✅ Complete" if self.layer_completed[3] else "⚪ Incomplete",
@@ -590,7 +610,8 @@ class MainWindow(ctk.CTk):
             f"ISO: {os.path.basename(self.selected_iso)}\n"
             f"Volume: {self.volume_var.get()}\n"
             f"Partition: {self.partition_var.get()}\n"
-            f"Target: {self.target_var.get()}\n\n"
+            f"Target: {self.target_var.get()}\n"
+            f"File system: {self.system_var.get()}\n\n"
             "Are you sure you want to continue?"
         )
         
@@ -632,6 +653,7 @@ class MainWindow(ctk.CTk):
                 volume_name=self.volume_var.get(),
                 partition_scheme=self.partition_var.get(),
                 target_system=self.target_var.get(),
+                file_system=self.system_var.get(),
                 progress_callback=self.update_progress
             )
             
