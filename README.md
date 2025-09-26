@@ -55,7 +55,7 @@ To create a standalone executable:
 py build.py
 ```
 
-This will create a single executable file in the `dist` folder. (It requires `icon.ico` at the the same folder to start the application.)
+This will create a single executable file in the `dist` folder. (It requires `icon.ico` inside a `ui` folder at the the same place to start the application.)
 
 ## Usage
 
