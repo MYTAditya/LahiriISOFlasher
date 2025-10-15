@@ -16,12 +16,16 @@ from core.flasher import ISOFlasher
 class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
-        
+
         # Configure window
         self.title("Lahiri ISO Flasher")
         self.geometry("800x750")
         self.resizable(False, False)
         self.wm_iconbitmap("ui/icon.ico")
+
+        # Set monospace font for entire application
+        ctk.set_default_color_theme("blue")
+        self.default_font = ctk.CTkFont(family="Courier New", size=12)
         
         # Set custom colors
         self.primary_color = "#a9e43a"
@@ -37,6 +41,7 @@ class MainWindow(ctk.CTk):
         # Application state
         self.selected_drive = None
         self.selected_iso = None
+        self.boot_method = "Disk or ISO (Please Select)"  # Boot method selection
         self.volume_name = ""
         self.partition_scheme = "MBR"
         self.target_system = "BIOS or UEFI"
@@ -118,7 +123,7 @@ class MainWindow(ctk.CTk):
         title_label = ctk.CTkLabel(
             header_frame,
             text="Lahiri ISO Flasher",
-            font=ctk.CTkFont(size=32, weight="bold"),
+            font=ctk.CTkFont(family="Courier New", size=32, weight="bold"),
             text_color=self.primary_color
         )
         title_label.pack(side="left")
@@ -135,7 +140,7 @@ class MainWindow(ctk.CTk):
         self.drive_title = ctk.CTkLabel(
             title_container,
             text="1. Select USB Drive",
-            font=ctk.CTkFont(size=18, weight="bold"),
+            font=ctk.CTkFont(family="Courier New", size=18, weight="bold"),
             text_color=self.primary_color
         )
         self.drive_title.pack(side="left")
@@ -143,7 +148,7 @@ class MainWindow(ctk.CTk):
         self.drive_status = ctk.CTkLabel(
             title_container,
             text="⚪ Incomplete",
-            font=ctk.CTkFont(size=14),
+            font=ctk.CTkFont(family="Courier New", size=14),
             text_color="gray"
         )
         self.drive_status.pack(side="right")
@@ -178,42 +183,59 @@ class MainWindow(ctk.CTk):
         # ISO selection frame
         self.iso_frame = ctk.CTkFrame(self.main_frame, fg_color=self.disabled_color)
         self.iso_frame.pack(fill="x", pady=(0, 15))
-        
+
         # Title with status indicator
         title_container = ctk.CTkFrame(self.iso_frame, fg_color="transparent")
         title_container.pack(fill="x", padx=20, pady=(15, 10))
-        
+
         self.iso_title = ctk.CTkLabel(
             title_container,
-            text="2. Select ISO File",
-            font=ctk.CTkFont(size=18, weight="bold"),
+            text="2. Select Boot Method",
+            font=ctk.CTkFont(family="Courier New", size=18, weight="bold"),
             text_color="gray"
         )
         self.iso_title.pack(side="left")
-        
+
         self.iso_status = ctk.CTkLabel(
             title_container,
             text="⚪ Incomplete",
-            font=ctk.CTkFont(size=14),
+            font=ctk.CTkFont(family="Courier New", size=14),
             text_color="gray"
         )
         self.iso_status.pack(side="right")
-        
+
+        # Boot method selection container
+        boot_method_container = ctk.CTkFrame(self.iso_frame, fg_color="transparent")
+        boot_method_container.pack(fill="x", padx=20, pady=(0, 10))
+
+        # Boot method dropdown
+        self.boot_method_var = ctk.StringVar(value="Disk or ISO (Please Select)")
+        self.boot_method_dropdown = ctk.CTkComboBox(
+            boot_method_container,
+            variable=self.boot_method_var,
+            values=["Disk or ISO (Please Select)", "Non Bootable"],
+            width=300,
+            command=self.on_boot_method_changed,
+            state="disabled"
+        )
+        self.boot_method_dropdown.pack(side="left", padx=(0, 10))
+
         # ISO selection container
         iso_container = ctk.CTkFrame(self.iso_frame, fg_color="transparent")
         iso_container.pack(fill="x", padx=20, pady=(0, 15))
-        
+
         # ISO path display
-        self.iso_path_var = ctk.StringVar(value="No ISO file selected")
+        self.iso_path_var = ctk.StringVar(value="Disk or ISO (Please Select)")
         self.iso_path_label = ctk.CTkLabel(
             iso_container,
             textvariable=self.iso_path_var,
             width=400,
             anchor="w",
-            text_color="gray"
+            text_color="gray",
+            font=ctk.CTkFont(family="Courier New", size=12)
         )
         self.iso_path_label.pack(side="left", padx=(0, 10))
-        
+
         # Browse button
         self.browse_btn = ctk.CTkButton(
             iso_container,
@@ -222,7 +244,8 @@ class MainWindow(ctk.CTk):
             command=self.browse_iso,
             fg_color="gray",
             text_color="white",
-            state="disabled"
+            state="disabled",
+            font=ctk.CTkFont(family="Courier New", size=12)
         )
         self.browse_btn.pack(side="left")
         
@@ -238,15 +261,15 @@ class MainWindow(ctk.CTk):
         self.config_title = ctk.CTkLabel(
             title_container,
             text="3. Configuration",
-            font=ctk.CTkFont(size=18, weight="bold"),
+            font=ctk.CTkFont(family="Courier New", size=18, weight="bold"),
             text_color="gray"
         )
         self.config_title.pack(side="left")
-        
+
         self.config_status = ctk.CTkLabel(
             title_container,
             text="⚪ Incomplete",
-            font=ctk.CTkFont(size=14),
+            font=ctk.CTkFont(family="Courier New", size=14),
             text_color="gray"
         )
         self.config_status.pack(side="right")
@@ -260,23 +283,34 @@ class MainWindow(ctk.CTk):
         left_column.pack(side="left", fill="both", expand=True, padx=(0, 10))
         
         # Volume name
-        self.volume_label = ctk.CTkLabel(left_column, text="Volume Name (max 11 chars):", text_color="gray")
+        self.volume_label = ctk.CTkLabel(
+            left_column,
+            text="Volume Name (max 11 chars):",
+            text_color="gray",
+            font=ctk.CTkFont(family="Courier New", size=12)
+        )
         self.volume_label.pack(anchor="w", pady=(0, 5))
-        
+
         self.volume_var = ctk.StringVar()
         self.volume_var.trace("w", self.on_volume_change)
         self.volume_entry = ctk.CTkEntry(
-            left_column, 
-            textvariable=self.volume_var, 
+            left_column,
+            textvariable=self.volume_var,
             width=200,
-            state="disabled"
+            state="disabled",
+            font=ctk.CTkFont(family="Courier New", size=12)
         )
         self.volume_entry.pack(anchor="w", pady=(0, 15))
         
         # Partition scheme
-        self.partition_label = ctk.CTkLabel(left_column, text="Partition Scheme:", text_color="gray")
+        self.partition_label = ctk.CTkLabel(
+            left_column,
+            text="Partition Scheme:",
+            text_color="gray",
+            font=ctk.CTkFont(family="Courier New", size=12)
+        )
         self.partition_label.pack(anchor="w", pady=(0, 5))
-        
+
         self.partition_var = ctk.StringVar(value="MBR")
         self.partition_var.trace("w", self.on_config_change)
         self.partition_dropdown = ctk.CTkComboBox(
@@ -284,7 +318,8 @@ class MainWindow(ctk.CTk):
             variable=self.partition_var,
             values=["MBR", "GPT"],
             width=200,
-            state="disabled"
+            state="disabled",
+            font=ctk.CTkFont(family="Courier New", size=12)
         )
         self.partition_dropdown.pack(anchor="w")
         
@@ -293,9 +328,14 @@ class MainWindow(ctk.CTk):
         right_column.pack(side="right", fill="both", expand=True, padx=(10, 0))
         
         # Target system
-        self.target_label = ctk.CTkLabel(right_column, text="Target System:", text_color="gray")
+        self.target_label = ctk.CTkLabel(
+            right_column,
+            text="Target System:",
+            text_color="gray",
+            font=ctk.CTkFont(family="Courier New", size=12)
+        )
         self.target_label.pack(anchor="w", pady=(0, 5))
-        
+
         self.target_var = ctk.StringVar(value="BIOS or UEFI")
         self.target_var.trace("w", self.on_config_change)
         self.target_dropdown = ctk.CTkComboBox(
@@ -303,14 +343,20 @@ class MainWindow(ctk.CTk):
             variable=self.target_var,
             values=["BIOS or UEFI", "UEFI", "BIOS (Legacy)"],
             width=200,
-            state="disabled"
+            state="disabled",
+            font=ctk.CTkFont(family="Courier New", size=12)
         )
         self.target_dropdown.pack(anchor="w", pady=(0, 15))
 
         # File system
-        self.system_label = ctk.CTkLabel(right_column, text="File System:", text_color="gray")
+        self.system_label = ctk.CTkLabel(
+            right_column,
+            text="File System:",
+            text_color="gray",
+            font=ctk.CTkFont(family="Courier New", size=12)
+        )
         self.system_label.pack(anchor="w", pady=(0, 5))
-        
+
         self.system_var = ctk.StringVar(value="FAT32")
         self.system_var.trace("w", self.on_config_change)
         self.system_dropdown = ctk.CTkComboBox(
@@ -318,7 +364,8 @@ class MainWindow(ctk.CTk):
             variable=self.system_var,
             values=["FAT32", "NTFS"],
             width=200,
-            state="disabled"
+            state="disabled",
+            font=ctk.CTkFont(family="Courier New", size=12)
         )
         self.system_dropdown.pack(anchor="w")
         
@@ -334,15 +381,15 @@ class MainWindow(ctk.CTk):
         self.flash_title = ctk.CTkLabel(
             title_container,
             text="4. Flash ISO",
-            font=ctk.CTkFont(size=18, weight="bold"),
+            font=ctk.CTkFont(family="Courier New", size=18, weight="bold"),
             text_color="gray"
         )
         self.flash_title.pack(side="left")
-        
+
         self.flash_status = ctk.CTkLabel(
             title_container,
             text="⚪ Ready",
-            font=ctk.CTkFont(size=14),
+            font=ctk.CTkFont(family="Courier New", size=14),
             text_color="gray"
         )
         self.flash_status.pack(side="right")
@@ -357,20 +404,20 @@ class MainWindow(ctk.CTk):
             text="FLASH",
             width=200,
             height=50,
-            font=ctk.CTkFont(size=16, weight="bold"),
+            font=ctk.CTkFont(family="Courier New", size=16, weight="bold"),
             command=self.start_flash,
             fg_color="gray",
             text_color="white",
             state="disabled"
         )
         self.flash_btn.pack(pady=(0, 10))
-        
+
         # Percentage indicator
         self.percentage_var = ctk.StringVar(value="0%")
         self.percentage_label = ctk.CTkLabel(
             flash_container,
             textvariable=self.percentage_var,
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ctk.CTkFont(family="Courier New", size=14, weight="bold"),
             text_color=self.primary_color
         )
         self.percentage_label.pack()
@@ -389,7 +436,7 @@ class MainWindow(ctk.CTk):
         self.status_label = ctk.CTkLabel(
             self.progress_frame,
             textvariable=self.status_var,
-            font=ctk.CTkFont(size=14)
+            font=ctk.CTkFont(family="Courier New", size=14)
         )
         self.status_label.pack(pady=(0, 15))
         
@@ -409,15 +456,25 @@ class MainWindow(ctk.CTk):
             self.iso_frame.configure(fg_color=self.card_color)
             self.iso_title.configure(text_color=self.primary_color)
             self.iso_path_label.configure(text_color="white")
-            self.browse_btn.configure(
-                state="normal",
-                fg_color=self.primary_color,
-                text_color="black"
-            )
+            self.boot_method_dropdown.configure(state="normal")
+            # Enable browse button only if "Disk or ISO" is selected
+            if self.boot_method_var.get() == "Disk or ISO (Please Select)":
+                self.browse_btn.configure(
+                    state="normal",
+                    fg_color=self.primary_color,
+                    text_color="black"
+                )
+            else:
+                self.browse_btn.configure(
+                    state="disabled",
+                    fg_color="gray",
+                    text_color="white"
+                )
         else:
             self.iso_frame.configure(fg_color=self.disabled_color)
             self.iso_title.configure(text_color="gray")
             self.iso_path_label.configure(text_color="gray")
+            self.boot_method_dropdown.configure(state="disabled")
             self.browse_btn.configure(
                 state="disabled",
                 fg_color="gray",
@@ -515,16 +572,52 @@ class MainWindow(ctk.CTk):
             
         self.update_layer_states()
             
+    def on_boot_method_changed(self, selection):
+        """Handle boot method dropdown changes"""
+        self.boot_method = selection
+
+        if selection == "Non Bootable":
+            # No ISO needed, just format the drive
+            self.selected_iso = None
+            self.iso_path_var.set("Non Bootable")
+            self.layer_completed[2] = True
+            self.browse_btn.configure(
+                state="disabled",
+                fg_color="gray",
+                text_color="white"
+            )
+        elif selection == "Disk or ISO (Please Select)":
+            # Need to select ISO
+            self.selected_iso = None
+            self.iso_path_var.set("Disk or ISO (Please Select)")
+            self.layer_completed[2] = False
+            if self.layer_completed[1]:
+                self.browse_btn.configure(
+                    state="normal",
+                    fg_color=self.primary_color,
+                    text_color="black"
+                )
+
+        # Reset subsequent layers
+        if not self.layer_completed[2]:
+            self.layer_completed[3] = False
+            self.layer_completed[4] = False
+
+        self.update_layer_states()
+
     def browse_iso(self):
         """Browse for ISO file"""
         if not self.layer_completed[1]:
             return
-            
+
+        if self.boot_method_var.get() != "Disk or ISO (Please Select)":
+            return
+
         file_path = filedialog.askopenfilename(
             title="Select ISO File",
             filetypes=[("ISO files", "*.iso"), ("All files", "*.*")]
         )
-        
+
         if file_path:
             # Validate ISO file
             if self.iso_handler.validate_iso(file_path):
@@ -532,10 +625,10 @@ class MainWindow(ctk.CTk):
                 filename = os.path.basename(file_path)
                 self.iso_path_var.set(filename)
                 self.layer_completed[2] = True
-                
+
                 # Don't auto-set volume name from ISO anymore
                 # User must manually enter volume name
-                
+
                 # Check if ISO is bootable
                 if not self.iso_handler.is_bootable(file_path):
                     messagebox.showwarning(
@@ -546,16 +639,18 @@ class MainWindow(ctk.CTk):
             else:
                 messagebox.showerror("Error", "Invalid ISO file selected.")
                 self.selected_iso = None
+                self.iso_path_var.set("Disk or ISO (Please Select)")
                 self.layer_completed[2] = False
         else:
             self.selected_iso = None
+            self.iso_path_var.set("Disk or ISO (Please Select)")
             self.layer_completed[2] = False
-            
+
         # Reset subsequent layers if ISO changes
         if not self.layer_completed[2]:
             self.layer_completed[3] = False
             self.layer_completed[4] = False
-            
+
         self.update_layer_states()
         
     def on_volume_change(self, *args):
@@ -594,20 +689,21 @@ class MainWindow(ctk.CTk):
         if not self.selected_drive:
             messagebox.showerror("Error", "Please select a USB drive.")
             return
-            
-        if not self.selected_iso:
+
+        if self.boot_method_var.get() == "Disk or ISO (Please Select)" and not self.selected_iso:
             messagebox.showerror("Error", "Please select an ISO file.")
             return
-            
+
         if not self.volume_var.get().strip():
             messagebox.showerror("Error", "Please enter a volume name.")
             return
-            
+
         # Confirm action
+        iso_info = f"ISO: {os.path.basename(self.selected_iso)}\n" if self.selected_iso else "Mode: Non Bootable (Format Only)\n"
         result = messagebox.askyesno(
             "Confirm Flash",
             f"This will erase all data on drive {self.selected_drive}.\n"
-            f"ISO: {os.path.basename(self.selected_iso)}\n"
+            f"{iso_info}"
             f"Volume: {self.volume_var.get()}\n"
             f"Partition: {self.partition_var.get()}\n"
             f"Target: {self.target_var.get()}\n"
