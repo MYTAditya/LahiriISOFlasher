@@ -12,12 +12,17 @@ class ISOFlasher:
         self.temp_dir = None
         
     def flash_iso(self, iso_path, drive_letter, volume_name, partition_scheme, target_system, file_system, progress_callback=None):
-        """Flash ISO to USB drive using temporary folder extraction method"""
+        """Flash ISO to USB drive using temporary folder extraction method or format only for non-bootable"""
         self.progress_callback = progress_callback
-        
+
         try:
             # Update progress
             self._update_progress(5, "Validating inputs...")
+
+            # Check if this is a non-bootable format-only operation
+            if iso_path is None:
+                # Non-bootable mode - just format the drive
+                return self._format_only_mode(drive_letter, volume_name, partition_scheme, file_system)
 
             # To prevent unwanted configuration
             if partition_scheme == "MBR":
@@ -38,70 +43,95 @@ class ISOFlasher:
                         raise Exception("Selected unwanted configuration")
                 else:
                     raise Exception("Selected unwanted configuration")
-            
+
             # Validate inputs
             if not os.path.exists(iso_path):
                 raise Exception("ISO file not found")
-                
+
             if not os.path.exists(f"{drive_letter}:\\"):
                 raise Exception("USB drive not found")
-                
+
             # Get drive info before formatting
             drive_info = self._get_drive_info(drive_letter)
             if not drive_info:
                 raise Exception("Could not get drive information")
-                
+
             # Update progress
             self._update_progress(10, "Preparing USB drive...")
-            
+
             # Format the drive first
             if not self._format_drive_standalone(drive_letter, volume_name, partition_scheme, file_system):
                 raise Exception("Failed to format USB drive")
-                
+
             # Update progress
             self._update_progress(20, "Creating temporary folder...")
-            
+
             # Create hidden temporary folder
             self.temp_dir = tempfile.mkdtemp(prefix=".iso_extract_")
-            
+
             # Update progress
             self._update_progress(25, "Extracting ISO to temporary folder...")
-            
+
             # Extract ISO contents to temporary folder
             if not self._extract_iso_to_temp(iso_path):
                 raise Exception("Failed to extract ISO contents")
-                
+
             # Update progress
             self._update_progress(70, "Copying files to USB drive...")
-            
+
             # Copy all files from temp folder to USB drive
             if not self._copy_temp_to_usb(drive_letter):
                 raise Exception("Failed to copy files to USB drive")
-                
+
             # Update progress
             self._update_progress(90, "Making drive bootable...")
-            
+
             # Make the drive bootable
             if not self._make_bootable_standalone(drive_letter, target_system):
                 raise Exception("Failed to make drive bootable")
-                
+
             # Update progress
             self._update_progress(95, "Cleaning up temporary files...")
-            
+
             # Clean up temporary folder
             self._cleanup_temp_dir()
-            
+
             # Update progress
             self._update_progress(100, "Flash completed successfully!")
-            
+
             return True
-            
+
         except Exception as e:
             # Clean up on error
             self._cleanup_temp_dir()
             self._update_progress(0, f"Error: {str(e)}")
             raise e
             
+    def _format_only_mode(self, drive_letter, volume_name, partition_scheme, file_system):
+        """Format-only mode for non-bootable USB drives"""
+        try:
+            # Update progress
+            self._update_progress(10, "Validating drive...")
+
+            if not os.path.exists(f"{drive_letter}:\\"):
+                raise Exception("USB drive not found")
+
+            # Update progress
+            self._update_progress(20, "Formatting USB drive...")
+
+            # Format the drive using diskpart
+            if not self._format_drive_standalone(drive_letter, volume_name, partition_scheme, file_system):
+                raise Exception("Failed to format USB drive")
+
+            # Update progress
+            self._update_progress(100, "Format completed successfully!")
+
+            return True
+
+        except Exception as e:
+            self._update_progress(0, f"Error: {str(e)}")
+            raise e
+
     def _update_progress(self, progress, status):
         """Update progress callback"""
         if self.progress_callback:
