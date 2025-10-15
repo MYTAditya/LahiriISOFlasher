@@ -26,12 +26,37 @@ class MainWindow(ctk.CTk):
         # Set monospace font for entire application
         ctk.set_default_color_theme("blue")
         self.default_font = ctk.CTkFont(family="Courier New", size=12)
-        
-        # Set custom colors
-        self.primary_color = "#a9e43a"
-        self.bg_color = "#1a1a1a"
-        self.card_color = "#2b2b2b"
-        self.disabled_color = "#404040"
+
+        # Theme state
+        self.current_theme = "dark"  # default theme
+
+        # Dark theme colors
+        self.dark_theme = {
+            "primary_color": "#a9e43a",
+            "hover_color": "#01c45b",
+            "bg_color": "#1a1a1a",
+            "card_color": "#2b2b2b",
+            "disabled_color": "#404040",
+            "text_color": "white"
+        }
+
+        # Light theme colors
+        self.light_theme = {
+            "primary_color": "#561bc5",
+            "hover_color": "#fe3ba4",
+            "bg_color": "#ffffff",
+            "card_color": "#f0f0f0",
+            "disabled_color": "#d0d0d0",
+            "text_color": "black"
+        }
+
+        # Set current colors based on theme
+        self.primary_color = self.dark_theme["primary_color"]
+        self.hover_color = self.dark_theme["hover_color"]
+        self.bg_color = self.dark_theme["bg_color"]
+        self.card_color = self.dark_theme["card_color"]
+        self.disabled_color = self.dark_theme["disabled_color"]
+        self.text_color = self.dark_theme["text_color"]
         
         # Initialize handlers
         self.iso_handler = ISOHandler()
@@ -56,6 +81,7 @@ class MainWindow(ctk.CTk):
             4: False   # Flash
         }
         
+        self.setup_menu()
         self.setup_ui()
         self.refresh_drives()
         self.update_layer_states()
@@ -67,8 +93,76 @@ class MainWindow(ctk.CTk):
             base_path = sys._MEIPASS
         except Exception:
             base_path = os.path.abspath(".")
-        
+
         return os.path.join(base_path, relative_path)
+
+    def setup_menu(self):
+        """Setup menu bar"""
+        menubar = tk.Menu(self)
+        self.config(menu=menubar)
+
+        # Theme menu
+        theme_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Theme", menu=theme_menu)
+
+        self.theme_var = tk.StringVar(value="dark")
+        theme_menu.add_radiobutton(
+            label="Dark Theme",
+            variable=self.theme_var,
+            value="dark",
+            command=lambda: self.switch_theme("dark")
+        )
+        theme_menu.add_radiobutton(
+            label="Light Theme",
+            variable=self.theme_var,
+            value="light",
+            command=lambda: self.switch_theme("light")
+        )
+
+        # GitHub menu
+        menubar.add_command(label="GitHub", command=self.open_github)
+
+        # Donate menu
+        menubar.add_command(label="Donate", command=self.open_donate)
+
+    def switch_theme(self, theme):
+        """Switch between light and dark themes"""
+        self.current_theme = theme
+
+        if theme == "dark":
+            colors = self.dark_theme
+            ctk.set_appearance_mode("dark")
+        else:
+            colors = self.light_theme
+            ctk.set_appearance_mode("light")
+
+        # Update colors
+        self.primary_color = colors["primary_color"]
+        self.hover_color = colors["hover_color"]
+        self.bg_color = colors["bg_color"]
+        self.card_color = colors["card_color"]
+        self.disabled_color = colors["disabled_color"]
+        self.text_color = colors["text_color"]
+
+        # Recreate UI with new colors
+        self.main_frame.destroy()
+        self.setup_ui()
+        self.refresh_drives()
+        self.update_layer_states()
+
+    def open_github(self):
+        """Open GitHub link"""
+        try:
+            os.startfile("https://github.com/MYTAditya")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open GitHub link: {str(e)}")
+
+    def open_donate(self):
+        """Open donation link"""
+        try:
+            os.startfile("https://ko-fi.com/MYTAditya")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open donation link: {str(e)}")
         
     def setup_ui(self):
         # Main container
@@ -175,6 +269,7 @@ class MainWindow(ctk.CTk):
             width=100,
             command=self.refresh_drives,
             fg_color=self.primary_color,
+            hover_color=self.hover_color,
             text_color="black"
         )
         self.refresh_btn.pack(side="left")
@@ -243,6 +338,7 @@ class MainWindow(ctk.CTk):
             width=100,
             command=self.browse_iso,
             fg_color="gray",
+            hover_color=self.hover_color,
             text_color="white",
             state="disabled",
             font=ctk.CTkFont(family="Courier New", size=12)
@@ -407,6 +503,7 @@ class MainWindow(ctk.CTk):
             font=ctk.CTkFont(family="Courier New", size=16, weight="bold"),
             command=self.start_flash,
             fg_color="gray",
+            hover_color=self.hover_color,
             text_color="white",
             state="disabled"
         )
@@ -455,7 +552,7 @@ class MainWindow(ctk.CTk):
         if self.layer_completed[1]:
             self.iso_frame.configure(fg_color=self.card_color)
             self.iso_title.configure(text_color=self.primary_color)
-            self.iso_path_label.configure(text_color="white")
+            self.iso_path_label.configure(text_color=self.text_color)
             self.boot_method_dropdown.configure(state="normal")
             # Enable browse button only if "Disk or ISO" is selected
             if self.boot_method_var.get() == "Disk or ISO (Please Select)":
@@ -490,10 +587,10 @@ class MainWindow(ctk.CTk):
         if self.layer_completed[2]:
             self.config_frame.configure(fg_color=self.card_color)
             self.config_title.configure(text_color=self.primary_color)
-            self.volume_label.configure(text_color="white")
-            self.partition_label.configure(text_color="white")
-            self.target_label.configure(text_color="white")
-            self.system_label.configure(text_color="white")
+            self.volume_label.configure(text_color=self.text_color)
+            self.partition_label.configure(text_color=self.text_color)
+            self.target_label.configure(text_color=self.text_color)
+            self.system_label.configure(text_color=self.text_color)
             self.volume_entry.configure(state="normal")
             self.partition_dropdown.configure(state="normal")
             self.target_dropdown.configure(state="normal")
@@ -522,6 +619,7 @@ class MainWindow(ctk.CTk):
             self.flash_btn.configure(
                 state="normal",
                 fg_color=self.primary_color,
+                hover_color=self.hover_color,
                 text_color="black"
             )
             self.flash_status.configure(
