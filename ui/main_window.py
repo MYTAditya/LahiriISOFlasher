@@ -233,7 +233,7 @@ class MainWindow(ctk.CTk):
         
         self.drive_title = ctk.CTkLabel(
             title_container,
-            text="1. Select USB Drive",
+            text="Select USB Drive",
             font=ctk.CTkFont(family="Courier New", size=18, weight="bold"),
             text_color=self.primary_color
         )
@@ -285,7 +285,7 @@ class MainWindow(ctk.CTk):
 
         self.iso_title = ctk.CTkLabel(
             title_container,
-            text="2. Select Boot Method",
+            text="Select Boot Method",
             font=ctk.CTkFont(family="Courier New", size=18, weight="bold"),
             text_color="gray"
         )
@@ -356,7 +356,7 @@ class MainWindow(ctk.CTk):
         
         self.config_title = ctk.CTkLabel(
             title_container,
-            text="3. Configuration",
+            text="Configuration",
             font=ctk.CTkFont(family="Courier New", size=18, weight="bold"),
             text_color="gray"
         )
@@ -476,7 +476,7 @@ class MainWindow(ctk.CTk):
         
         self.flash_title = ctk.CTkLabel(
             title_container,
-            text="4. Flash ISO",
+            text="Flash ISO",
             font=ctk.CTkFont(family="Courier New", size=18, weight="bold"),
             text_color="gray"
         )
@@ -493,7 +493,7 @@ class MainWindow(ctk.CTk):
         # Flash button container
         flash_container = ctk.CTkFrame(self.flash_frame, fg_color="transparent")
         flash_container.pack(fill="x", padx=20, pady=(0, 15))
-        
+
         # Flash button
         self.flash_btn = ctk.CTkButton(
             flash_container,
@@ -509,15 +509,30 @@ class MainWindow(ctk.CTk):
         )
         self.flash_btn.pack(pady=(0, 10))
 
-        # Percentage indicator
+        # Progress bar and percentage container
+        progress_container = ctk.CTkFrame(flash_container, fg_color="transparent")
+        progress_container.pack(fill="x", pady=(0, 0))
+
+        # Progress bar (green color, not affected by theme)
+        self.flash_progress_bar = ctk.CTkProgressBar(
+            progress_container,
+            width=600,
+            height=15,
+            progress_color="#00ff00"
+        )
+        self.flash_progress_bar.pack(side="left", padx=(0, 10))
+        self.flash_progress_bar.set(0)
+
+        # Percentage indicator (right side)
         self.percentage_var = ctk.StringVar(value="0%")
         self.percentage_label = ctk.CTkLabel(
-            flash_container,
+            progress_container,
             textvariable=self.percentage_var,
             font=ctk.CTkFont(family="Courier New", size=14, weight="bold"),
-            text_color=self.primary_color
+            text_color=self.primary_color,
+            width=50
         )
-        self.percentage_label.pack()
+        self.percentage_label.pack(side="left")
         
     def setup_progress_section(self):
         # Progress frame (initially hidden)
@@ -685,7 +700,7 @@ class MainWindow(ctk.CTk):
                 text_color="white"
             )
         elif selection == "Disk or ISO (Please Select)":
-            # Need to select ISO
+            # ISO selection is compulsory
             self.selected_iso = None
             self.iso_path_var.set("Disk or ISO (Please Select)")
             self.layer_completed[2] = False
@@ -886,6 +901,7 @@ class MainWindow(ctk.CTk):
     def update_progress(self, progress, status):
         """Update progress bar, status, and percentage"""
         self.progress_bar.set(progress / 100.0)
+        self.flash_progress_bar.set(progress / 100.0)
         self.status_var.set(status)
         self.percentage_var.set(f"{int(progress)}%")
         self.update()

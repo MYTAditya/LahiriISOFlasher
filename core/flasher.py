@@ -64,23 +64,10 @@ class ISOFlasher:
                 raise Exception("Failed to format USB drive")
 
             # Update progress
-            self._update_progress(20, "Creating temporary folder...")
+            self._update_progress(25, "Mounting ISO and copying files...")
 
-            # Create hidden temporary folder
-            self.temp_dir = tempfile.mkdtemp(prefix=".iso_extract_")
-
-            # Update progress
-            self._update_progress(25, "Extracting ISO to temporary folder...")
-
-            # Extract ISO contents to temporary folder
-            if not self._extract_iso_to_temp(iso_path):
-                raise Exception("Failed to extract ISO contents")
-
-            # Update progress
-            self._update_progress(70, "Copying files to USB drive...")
-
-            # Copy all files from temp folder to USB drive
-            if not self._copy_temp_to_usb(drive_letter):
+            # Copy all files directly from mounted ISO to USB drive using xcopy
+            if not self._copy_iso_to_usb_direct(iso_path, drive_letter):
                 raise Exception("Failed to copy files to USB drive")
 
             # Update progress
@@ -91,10 +78,7 @@ class ISOFlasher:
                 raise Exception("Failed to make drive bootable")
 
             # Update progress
-            self._update_progress(95, "Cleaning up temporary files...")
-
-            # Clean up temporary folder
-            self._cleanup_temp_dir()
+            self._update_progress(95, "Finalizing...")
 
             # Update progress
             self._update_progress(100, "Flash completed successfully!")
@@ -102,8 +86,6 @@ class ISOFlasher:
             return True
 
         except Exception as e:
-            # Clean up on error
-            self._cleanup_temp_dir()
             self._update_progress(0, f"Error: {str(e)}")
             raise e
             
@@ -185,8 +167,7 @@ exit
                     time.sleep(3)
                     return os.path.exists(f"{drive_letter}:\\")
                 else:
-                    # Fallback to simple format
-                    return self._simple_format(drive_letter, volume_name, file_system)
+                    return False
                     
             finally:
                 # Clean up temp file
@@ -197,8 +178,7 @@ exit
                     
         except Exception as e:
             print(f"Error formatting drive: {e}")
-            # Final fallback
-            return self._simple_format(drive_letter, volume_name, "FAT32")
+            return False
             
     def _get_disk_number(self, drive_letter):
         """Get disk number for the drive letter"""
@@ -220,21 +200,6 @@ exit
             
         except Exception:
             return "1"
-            
-    def _simple_format(self, drive_letter, volume_name, file_system):
-        """Simple format using format command"""
-        try:
-            cmd = f'format {drive_letter}: /FS:{file_system} /V:"{volume_name}" /Q /Y'
-            result = subprocess.run(
-                cmd, 
-                shell=True, 
-                capture_output=True, 
-                timeout=180,
-                creationflags=subprocess.CREATE_NO_WINDOW
-            )
-            return result.returncode == 0
-        except:
-            return False
             
     def _extract_iso_to_temp(self, iso_path):
         """Extract ISO contents to temporary folder"""
@@ -480,6 +445,59 @@ exit
             print(f"Error copying to USB drive: {e}")
             return False
             
+    def _copy_iso_to_usb_direct(self, iso_path, drive_letter):
+        """Copy files directly from mounted ISO to USB drive using xcopy"""
+        try:
+            # Mount ISO using PowerShell
+            mount_cmd = [
+                'powershell', '-Command',
+                f'$mount = Mount-DiskImage -ImagePath "{iso_path}" -PassThru; '
+                f'$driveLetter = ($mount | Get-Volume).DriveLetter; '
+                f'Write-Output $driveLetter'
+            ]
+
+            result = subprocess.run(mount_cmd, capture_output=True, text=True, timeout=60)
+
+            if result.returncode == 0 and result.stdout.strip():
+                iso_drive = result.stdout.strip()
+                iso_path_src = f"{iso_drive}:\\"
+                drive_path = f"{drive_letter}:\\"
+
+                try:
+                    # Update progress
+                    self._update_progress(30, "Copying files from ISO to USB...")
+
+                    # Use xcopy to copy all files with /S (subdirectories) and /H (hidden files)
+                    xcopy_cmd = f'xcopy "{iso_path_src}*.*" "{drive_path}" /S /H /E /I /Y'
+
+                    result = subprocess.run(
+                        xcopy_cmd,
+                        shell=True,
+                        capture_output=True,
+                        text=True,
+                        timeout=600,
+                        creationflags=subprocess.CREATE_NO_WINDOW
+                    )
+
+                    # Update progress
+                    self._update_progress(70, "Files copied successfully")
+
+                    return result.returncode == 0
+
+                finally:
+                    # Unmount ISO
+                    unmount_cmd = [
+                        'powershell', '-Command',
+                        f'Dismount-DiskImage -ImagePath "{iso_path}"'
+                    ]
+                    subprocess.run(unmount_cmd, capture_output=True, timeout=30)
+
+            return False
+
+        except Exception as e:
+            print(f"Error copying ISO to USB: {e}")
+            return False
+
     def _cleanup_temp_dir(self):
         """Clean up temporary directory"""
         if self.temp_dir and os.path.exists(self.temp_dir):
